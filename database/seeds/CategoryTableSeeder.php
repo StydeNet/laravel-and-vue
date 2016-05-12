@@ -12,9 +12,8 @@ class CategoryTableSeeder extends Seeder
      */
     public function run()
     {
-        Category::create(['name' => 'Tareas']);
-        Category::create(['name' => 'Recordatorios']);
-        Category::create(['name' => 'Recursos']);
-        Category::create(['name' => 'Eventos']);
+        Category::create(['name' => 'Laravel']);
+        Category::create(['name' => 'Vue.js']);
+        Category::create(['name' => 'Sass']);
     }
 }
