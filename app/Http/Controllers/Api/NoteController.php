@@ -21,16 +21,6 @@ class NoteController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -38,7 +28,19 @@ class NoteController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $data = $request->only(['note', 'category_id']);
+
+        $this->validate($request, [
+            'note' => 'required',
+            'category_id' => 'exists:categories,id',
+        ]);
+
+        $note = Note::create($data);
+
+        return [
+            'success' => true,
+            'note'    => $note->toArray(),
+        ];
     }
 
     /**
@@ -48,17 +50,6 @@ class NoteController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show($id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
     {
         //
     }
