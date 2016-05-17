@@ -1,3 +1,7 @@
 <?php
 
-Route::resource('notes', 'NoteController');
+Route::resource('notes', 'NoteController', [
+    'parameters' => [
+        'notes' => 'note'
+    ]
+]);

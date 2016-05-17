@@ -63,6 +63,80 @@ class ApiNoteTest extends TestCase
             ]
         ]);
     }
+
+    function test_can_update_a_note()
+    {
+        $text = 'Updated note';
+
+        $category = factory(Category::class)->create();
+
+        $anotherCategory = factory(Category::class)->create();
+
+        $note = factory(Note::class)->make();
+
+        $category->notes()->save($note);
+
+        $this->put('api/v1/notes/'.$note->id, [
+            'note'        => $text,
+            'category_id' => $anotherCategory->id,
+        ]);
+
+        $this->seeInDatabase('notes', [
+            'note' => $text,
+            'category_id' => $anotherCategory->id,
+        ]);
+
+        $this->seeJsonEquals([
+            'success' => true,
+            'note' => [
+                'id' => $note->id,
+                'note' => $text,
+                'category_id' => $anotherCategory->id,
+            ],
+        ]);
+    }
+
+    function test_validation_when_updating_a_note()
+    {
+        $category = factory(Category::class)->create();
+
+        $note = factory(Note::class)->make();
+
+        $category->notes()->save($note);
+
+        $this->put('api/v1/notes/'.$note->id, [
+            'note'        => '',
+            'category_id' => 100,
+        ], ['Accept' => 'application/json']);
+
+        $this->dontSeeInDatabase('notes', [
+            'id' => $note->id,
+            'note' => '',
+        ]);
+
+        $this->seeJsonEquals([
+            'success' => false,
+            'errors'  => [
+                'The note field is required.',
+                'The selected category is invalid.'
+            ]
+        ]);
+    }
+
+    function test_can_delete_a_note()
+    {
+        $note = factory(Note::class)->create();
+
+        $this->delete('api/v1/notes/'.$note->id, [], ['Accept' => 'application/json']);
+
+        $this->dontSeeInDatabase('notes', [
+            'id' => $note->id
+        ]);
+
+        $this->seeJsonEquals([
+            'success' => true
+        ]);
+    }
 }
 
 
