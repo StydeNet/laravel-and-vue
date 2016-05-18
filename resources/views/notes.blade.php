@@ -14,9 +14,14 @@
                 <tr v-for="note in notes" is="note-row" :note.sync="note" :categories="categories"></tr>
                 <tr>
                     <td><select-category :categories="categories" :id.sync="new_note.category_id"></select-category></td>
-                    <td><input type="text" v-model="new_note.note" class="form-control"></td>
                     <td>
-                        <a href="#" @@click="createNote()">
+                        <input type="text" v-model="new_note.note" class="form-control">
+                        <ul v-if="errors.length" class="text-danger">
+                            <li v-for="error in errors">@{{ error }}</li>
+                        </ul>
+                    </td>
+                    <td>
+                        <a href="#" @@click.prevent="createNote()">
                         <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
                         </a>
                     </td>
