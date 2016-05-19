@@ -3,7 +3,9 @@
 @section('content')
     <div class="row">
         <div class="col-md-8 col-md-offset-2">
-            <h1>Styde.net / Curso de VueJS / Lección 10</h1>
+            <h1>Styde.net / Curso de VueJS</h1>
+
+            <p v-show="error" class="alert alert-danger" id="error_message">@{{ error }}</p>
 
             <table class="table table-striped">
                 <tr>

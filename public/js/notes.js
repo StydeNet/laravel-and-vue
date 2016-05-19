@@ -30,9 +30,6 @@ Vue.component('note-row', {
         };
     },
     methods: {
-        remove: function () {
-            this.$parent.notes.$remove(this.note);
-        },
         edit: function () {
             this.errors = [];
 
@@ -61,6 +58,18 @@ Vue.component('note-row', {
                     this.errors = jqXHR.responseJSON.errors;
                 }.bind(this)
             });
+        },
+        remove: function () {
+
+            $.ajax({
+                url: '/api/v1/notes/'+this.note.id,
+                method: 'DELETE',
+                dataType: 'json',
+                success: function (data) {
+                    this.$parent.notes.$remove(this.note);
+                }.bind(this)
+            });
+
         }
     }
 });
@@ -74,6 +83,7 @@ var vm = new Vue({
         },
         notes: [],
         errors: [],
+        error: '',
         categories: [
             {
                 id: 1,
@@ -93,6 +103,14 @@ var vm = new Vue({
         $.getJSON('/api/v1/notes', [], function (notes) {
             vm.notes = notes;
         });
+
+        $(document).ajaxError(function (event, jqXHR) {
+            this.error = jqXHR.responseJSON.message;
+
+            $('#error_message').delay(3000).fadeOut(1000, function () {
+                this.error = '';
+            });
+        }.bind(this));
     },
     methods: {
         createNote: function () {
