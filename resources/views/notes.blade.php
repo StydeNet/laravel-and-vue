@@ -52,16 +52,28 @@
                 <td>
                     <a href="#" @click="edit()"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></a>
                     <a href="#" @click="remove()">
-                    <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+                        <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
                     </a>
                 </td>
             </template>
             <template v-else>
                 <td>
-                    <select-category :categories="categories" :id.sync="note.category_id"></select-category>
+                    <select-category :categories="categories" :id.sync="draft.category_id"></select-category>
                 </td>
-                <td><input type="text" v-model="note.note" class="form-control"></td>
-                <td><a href="#" @click="update()"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></a></td>
+                <td>
+                    <input type="text" v-model="draft.note" class="form-control">
+                    <ul v-if="errors.length" class="text-danger">
+                        <li v-for="error in errors">{{ error }}</li>
+                    </ul>
+                </td>
+                <td>
+                    <a href="#" @click.prevent="update()">
+                        <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                    </a>
+                    <a href="#" @click.prevent="cancel()">
+                        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                    </a>
+                </td>
             </template>
         </tr>
     </template>

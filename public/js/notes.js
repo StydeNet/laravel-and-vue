@@ -24,7 +24,9 @@ Vue.component('note-row', {
     props: ['note', 'categories'],
     data: function() { 
         return {
-            editing: false
+            editing: false,
+            errors: [],
+            draft: {}
         };
     },
     methods: {
@@ -32,10 +34,33 @@ Vue.component('note-row', {
             this.$parent.notes.$remove(this.note);
         },
         edit: function () {
+            this.errors = [];
+
+            this.draft = JSON.parse(JSON.stringify(this.note));
+
             this.editing = true;
         },
-        update: function () {
+        cancel: function () {
             this.editing = false;
+        },
+        update: function () {
+
+            this.errors = [];
+
+            $.ajax({
+                url: '/api/v1/notes/'+this.note.id,
+                method: 'PUT',
+                dataType: 'json',
+                data: this.draft,
+                success: function (data) {
+                    this.$parent.notes.$set(this.$parent.notes.indexOf(this.note), data.note);
+
+                    this.editing = false;
+                }.bind(this),
+                error: function (jqXHR) {
+                    this.errors = jqXHR.responseJSON.errors;
+                }.bind(this)
+            });
         }
     }
 });
