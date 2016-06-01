@@ -8,6 +8,8 @@ function findById(items, id) {
     return null;
 }
 
+var resource;
+
 Vue.filter('category', function (id) {
     var category = findById(this.categories, id);
 
@@ -41,35 +43,22 @@ Vue.component('note-row', {
             this.editing = false;
         },
         update: function () {
-
             this.errors = [];
 
-            $.ajax({
-                url: '/api/v1/notes/'+this.note.id,
-                method: 'PUT',
-                dataType: 'json',
-                data: this.draft,
-                success: function (data) {
-                    this.$parent.notes.$set(this.$parent.notes.indexOf(this.note), data.note);
+            var component = this;
 
-                    this.editing = false;
-                }.bind(this),
-                error: function (jqXHR) {
-                    this.errors = jqXHR.responseJSON.errors;
-                }.bind(this)
+            resource.update({id: this.note.id}, this.draft).then(function (response) {
+                this.notes.$set(this.notes.indexOf(component.note), response.data.note);
+            }, function (response) {
+                component.errors = response.data.errors;
             });
         },
         remove: function () {
+            var component = this;
 
-            $.ajax({
-                url: '/api/v1/notes/'+this.note.id,
-                method: 'DELETE',
-                dataType: 'json',
-                success: function (data) {
-                    this.$parent.notes.$remove(this.note);
-                }.bind(this)
+            resource.delete({id: this.note.id}).then(function (response) {
+                this.notes.$remove(component.note);
             });
-
         }
     }
 });
@@ -100,34 +89,44 @@ var vm = new Vue({
         ]
     },
     ready: function () {
-        $.getJSON('/api/v1/notes', [], function (notes) {
-            vm.notes = notes;
+        resource = this.$resource('/api/v1/notes{/id}');
+
+        resource.get().then(function (response) {
+            this.notes = response.data;
         });
 
-        $(document).ajaxError(function (event, jqXHR) {
-            this.error = jqXHR.responseJSON.message;
+        Vue.http.interceptors.push({
 
-            $('#error_message').delay(3000).fadeOut(1000, function () {
-                this.error = '';
-            });
-        }.bind(this));
+            request: function (request) {
+                return request;
+            },
+
+            response: function (response) {
+                if (response.ok) {
+                    return response;
+                }
+
+                $('#error_message').show();
+
+                this.error = response.data.message;
+
+                $('#error_message').delay(3000).fadeOut(1000, function () {
+                    this.error = '';
+                });
+
+                return response;
+            }.bind(this)
+
+        });
     },
     methods: {
         createNote: function () {
-
             this.errors = [];
 
-            $.ajax({
-                url: '/api/v1/notes',
-                method: 'POST',
-                data: this.new_note,
-                dataType: 'json',
-                success: function (data) {
-                    vm.notes.push(data.note);
-                },
-                error: function (jqXHR) {
-                    vm.errors = jqXHR.responseJSON.errors;
-                }
+            resource.save({}, this.new_note).then(function (response) {
+                this.notes.push(response.data.note);
+            }, function (response) {
+                this.errors = response.data.errors;
             });
 
             this.new_note = {note: '', category_id: ''};
