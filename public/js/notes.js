@@ -10,6 +10,10 @@ function findById(items, id) {
 
 var resource;
 
+Vue.transition('bounce-out', {
+    leaveClass: 'bounceOut'
+})
+
 Vue.filter('category', function (id) {
     var category = findById(this.categories, id);
 
@@ -72,7 +76,10 @@ var vm = new Vue({
         },
         notes: [],
         errors: [],
-        error: '',
+        alert: {
+            message: '',
+            display: false
+        },
         categories: [
             {
                 id: 1,
@@ -106,13 +113,12 @@ var vm = new Vue({
                     return response;
                 }
 
-                $('#error_message').show();
+                this.alert.message = response.data.message;
+                this.alert.display = true;
 
-                this.error = response.data.message;
-
-                $('#error_message').delay(3000).fadeOut(1000, function () {
-                    this.error = '';
-                });
+                setTimeout(function () {
+                    vm.alert.display = false;
+                }, 4000);
 
                 return response;
             }.bind(this)
@@ -135,7 +141,3 @@ var vm = new Vue({
     filters: {
     }
 });
-
-
-
-

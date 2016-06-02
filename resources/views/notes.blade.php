@@ -5,7 +5,12 @@
         <div class="col-md-8 col-md-offset-2">
             <h1>Styde.net / Curso de VueJS</h1>
 
-            <p v-show="error" class="alert alert-danger" id="error_message">@{{ error }}</p>
+            <div class="alert_container">
+                <p v-show="alert.display"
+                   class="alert alert-danger"
+                   id="error_message"
+                   transition="fade">@{{ alert.message }}</p>
+            </div>
 
             <table class="table table-striped">
                 <tr>
@@ -47,7 +52,7 @@
     </template>
 
     <template id="note_row_tpl">
-        <tr>
+        <tr class="animated" transition="bounce-out">
             <template v-if="! editing">
                 <td>{{ note.category_id | category }}</td>
                 <td>{{ note.note }}</td>
@@ -81,10 +86,26 @@
     </template>
     @endverbatim
 
+    <style>
+        .fade-transition {
+            transition: all 1s ease;
+            opacity: 100;
+        }
+        .fade-enter, .fade-leave {
+            opacity: 0;
+        }
+
+        .alert_container {
+            height: 60px;
+        }
+    </style>
+
     <script src="https://code.jquery.com/jquery-2.2.3.js"
             integrity="sha256-laXWtGydpwqJ8JA+X9x2miwmaiKhn8tVmOVEigRNtP4="
             crossorigin="anonymous"></script>
     <script src="{{ url('js/vue.js') }}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vue-resource/0.7.1/vue-resource.js"></script>
     <script src="{{ url('js/notes.js') }}"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.1/animate.min.css">
 @endsection
