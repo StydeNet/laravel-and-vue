@@ -52,7 +52,11 @@ Vue.component('note-row', {
             var component = this;
 
             resource.update({id: this.note.id}, this.draft).then(function (response) {
-                this.notes.$set(this.notes.indexOf(component.note), response.data.note);
+                for(var key in response.data.note) {
+                    component.note[key] = response.data.note[key];
+                }
+
+                component.editing = false;
             }, function (response) {
                 component.errors = response.data.errors;
             });
