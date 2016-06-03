@@ -18,7 +18,12 @@
                     <th>Nota</th>
                     <th width="50px">&nbsp;</th>
                 </tr>
-                <tr v-for="note in notes" is="note-row" :note.sync="note" :categories="categories"></tr>
+                <tr v-for="note in notes"
+                    is="note-row"
+                    :note="note"
+                    :categories="categories"
+                    @update-note="updateNote"
+                    @delete-note="deleteNote"></tr>
                 <tr>
                     <td><select-category :categories="categories" :id.sync="new_note.category_id"></select-category></td>
                     <td>
