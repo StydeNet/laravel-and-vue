@@ -11877,6 +11877,112 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
+
+var Vue = require('vue');
+
+Vue.use(require('vue-resource'));
+
+var resource;
+
+var utils = require('./../utils');
+
+exports.default = {
+    data: function data() {
+        return {
+            new_note: {
+                note: '',
+                category_id: ''
+            },
+            notes: [],
+            errors: [],
+            alert: {
+                message: '',
+                display: false
+            },
+            categories: [{
+                id: 1,
+                name: 'Laravel'
+            }, {
+                id: 2,
+                name: 'Vue.js'
+            }, {
+                id: 3,
+                name: 'Publicidad'
+            }]
+        };
+    },
+    ready: function ready() {
+        resource = this.$resource('/api/v1/notes{/id}');
+
+        resource.get().then(function (response) {
+            this.notes = response.data;
+        });
+
+        Vue.http.interceptors.push(function (request, next) {
+            next(function (response) {
+                if (response.ok) {
+                    return response;
+                }
+
+                this.alert.message = response.data.message;
+                this.alert.display = true;
+
+                setTimeout(function () {
+                    vm.alert.display = false;
+                }, 4000);
+
+                return response;
+            });
+        });
+    },
+    methods: {
+        createNote: function createNote() {
+            this.errors = [];
+
+            resource.save({}, this.new_note).then(function (response) {
+                this.notes.push(response.data.note);
+            }, function (response) {
+                this.errors = response.data.errors;
+            });
+
+            this.new_note = { note: '', category_id: '' };
+        },
+        deleteNote: function deleteNote(note) {
+            resource.delete({ id: note.id }).then(function (response) {
+                this.notes.$remove(note);
+            });
+        },
+        updateNote: function updateNote(component) {
+            resource.update({ id: component.note.id }, component.draft).then(function (response) {
+                utils.assign(component.note, response.data.note);
+
+                component.editing = false;
+            }, function (response) {
+                component.errors = response.data.errors;
+            });
+        }
+    },
+    filters: {}
+};
+if (module.exports.__esModule) module.exports = module.exports.default
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div class=\"alert_container\">\n    <p v-show=\"alert.display\" class=\"alert alert-danger\" id=\"error_message\" transition=\"fade\">{{ alert.message }}</p>\n</div>\n\n<table class=\"table table-striped\">\n    <tbody><tr>\n        <th>Categoría</th>\n        <th>Nota</th>\n        <th width=\"50px\">&nbsp;</th>\n    </tr>\n    <tr v-for=\"note in notes\" is=\"note-row\" :note=\"note\" :categories=\"categories\" @update-note=\"updateNote\" @delete-note=\"deleteNote\"></tr>\n    <tr>\n        <td><select-category :categories=\"categories\" :id.sync=\"new_note.category_id\"></select-category></td>\n        <td>\n            <input type=\"text\" v-model=\"new_note.note\" class=\"form-control\">\n            <ul v-if=\"errors.length\" class=\"text-danger\">\n                <li v-for=\"error in errors\">{{ error }}</li>\n            </ul>\n        </td>\n        <td>\n            <a href=\"#\" @click.prevent=\"createNote()\">\n            <span class=\"glyphicon glyphicon-ok\" aria-hidden=\"true\"></span>\n            </a>\n        </td>\n    </tr>\n</tbody></table>\n"
+if (module.hot) {(function () {  module.hot.accept()
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), true)
+  if (!hotAPI.compatible) return
+  if (!module.hot.data) {
+    hotAPI.createRecord("_v-802b8a12", module.exports)
+  } else {
+    hotAPI.update("_v-802b8a12", module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
+  }
+})()}
+},{"./../utils":12,"vue":7,"vue-hot-reload-api":5,"vue-resource":6}],9:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
 var _stringify = require('babel-runtime/core-js/json/stringify');
 
 var _stringify2 = _interopRequireDefault(_stringify);
@@ -11925,7 +12031,7 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update("_v-d4a61ece", module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"babel-runtime/core-js/json/stringify":1,"vue":7,"vue-hot-reload-api":5}],9:[function(require,module,exports){
+},{"babel-runtime/core-js/json/stringify":1,"vue":7,"vue-hot-reload-api":5}],10:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -11947,31 +12053,19 @@ if (module.hot) {(function () {  module.hot.accept()
     hotAPI.update("_v-d08af8f6", module.exports, (typeof module.exports === "function" ? module.exports.options : module.exports).template)
   }
 })()}
-},{"vue":7,"vue-hot-reload-api":5}],10:[function(require,module,exports){
+},{"vue":7,"vue-hot-reload-api":5}],11:[function(require,module,exports){
 'use strict';
 
 var Vue = require('vue');
 
-Vue.use(require('vue-resource'));
-
-function findById(items, id) {
-    for (var i in items) {
-        if (items[i].id == id) {
-            return items[i];
-        }
-    }
-
-    return null;
-}
-
-var resource;
+var utils = require('./utils');
 
 Vue.transition('bounce-out', {
     leaveClass: 'bounceOut'
 });
 
 Vue.filter('category', function (id) {
-    var category = findById(this.categories, id);
+    var category = utils.findById(this.categories, id);
 
     return category != null ? category.name : '';
 });
@@ -11980,86 +12074,35 @@ Vue.component('select-category', require('./components/select-category.vue'));
 
 Vue.component('note-row', require('./components/note-row.vue'));
 
+var App = require('./components/app.vue');
+
 var vm = new Vue({
     el: 'body',
-    data: {
-        new_note: {
-            note: '',
-            category_id: ''
-        },
-        notes: [],
-        errors: [],
-        alert: {
-            message: '',
-            display: false
-        },
-        categories: [{
-            id: 1,
-            name: 'Laravel'
-        }, {
-            id: 2,
-            name: 'Vue.js'
-        }, {
-            id: 3,
-            name: 'Publicidad'
-        }]
-    },
-    ready: function ready() {
-        resource = this.$resource('/api/v1/notes{/id}');
-
-        resource.get().then(function (response) {
-            this.notes = response.data;
-        });
-
-        Vue.http.interceptors.push(function (request, next) {
-            next(function (response) {
-                if (response.ok) {
-                    return response;
-                }
-
-                this.alert.message = response.data.message;
-                this.alert.display = true;
-
-                setTimeout(function () {
-                    vm.alert.display = false;
-                }, 4000);
-
-                return response;
-            });
-        });
-    },
-    methods: {
-        createNote: function createNote() {
-            this.errors = [];
-
-            resource.save({}, this.new_note).then(function (response) {
-                this.notes.push(response.data.note);
-            }, function (response) {
-                this.errors = response.data.errors;
-            });
-
-            this.new_note = { note: '', category_id: '' };
-        },
-        deleteNote: function deleteNote(note) {
-            resource.delete({ id: note.id }).then(function (response) {
-                this.notes.$remove(note);
-            });
-        },
-        updateNote: function updateNote(component) {
-            resource.update({ id: component.note.id }, component.draft).then(function (response) {
-                for (var key in response.data.note) {
-                    component.note[key] = response.data.note[key];
-                }
-
-                component.editing = false;
-            }, function (response) {
-                component.errors = response.data.errors;
-            });
-        }
-    },
-    filters: {}
+    components: {
+        app: App
+    }
 });
 
-},{"./components/note-row.vue":8,"./components/select-category.vue":9,"vue":7,"vue-resource":6}]},{},[10]);
+},{"./components/app.vue":8,"./components/note-row.vue":9,"./components/select-category.vue":10,"./utils":12,"vue":7}],12:[function(require,module,exports){
+"use strict";
+
+module.exports = {
+    findById: function findById(items, id) {
+        for (var i in items) {
+            if (items[i].id == id) {
+                return items[i];
+            }
+        }
+
+        return null;
+    },
+    assign: function assign(original, newData) {
+        for (var key in newData) {
+            original[key] = newData[key];
+        }
+    }
+};
+
+},{}]},{},[11]);
 
 //# sourceMappingURL=main.js.map
