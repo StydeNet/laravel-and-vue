@@ -9,7 +9,6 @@
 
 <script>
 export default {
-    template: "#select_category_tpl",
     props: ['categories', 'id']
 }
 </script>
