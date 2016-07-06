@@ -19,6 +19,12 @@ Route::get('name', function () {
     return \App\User::first()->name;
 });
 
-Route::get('notes', function () {
-    return view('notes');
+Route::group(['middleware' => 'auth'], function () {
+    Route::get('notes', function () {
+        return view('notes');
+    });
 });
+
+Route::auth();
+
+Route::get('/home', 'HomeController@index');

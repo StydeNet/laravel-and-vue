@@ -11919,6 +11919,10 @@ exports.default = {
         });
 
         Vue.http.interceptors.push(function (request, next) {
+            var token = document.getElementById('token').getAttribute('content');
+
+            request.headers['X-CSRF-TOKEN'] = token;
+
             next(function (response) {
                 if (response.ok) {
                     return response;
@@ -11928,8 +11932,8 @@ exports.default = {
                 this.alert.display = true;
 
                 setTimeout(function () {
-                    vm.alert.display = false;
-                }, 4000);
+                    this.alert.display = false;
+                }.bind(this), 4000);
 
                 return response;
             });
@@ -11965,7 +11969,7 @@ exports.default = {
     filters: {}
 };
 if (module.exports.__esModule) module.exports = module.exports.default
-;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div class=\"alert_container\">\n    <p v-show=\"alert.display\" class=\"alert alert-danger\" id=\"error_message\" transition=\"fade\">{{ alert.message }}</p>\n</div>\n\n<table class=\"table table-striped\">\n    <tbody><tr>\n        <th>Categoría</th>\n        <th>Nota</th>\n        <th width=\"50px\">&nbsp;</th>\n    </tr>\n    <tr v-for=\"note in notes\" is=\"note-row\" :note=\"note\" :categories=\"categories\" @update-note=\"updateNote\" @delete-note=\"deleteNote\"></tr>\n    <tr>\n        <td><select-category :categories=\"categories\" :id.sync=\"new_note.category_id\"></select-category></td>\n        <td>\n            <input type=\"text\" v-model=\"new_note.note\" class=\"form-control\">\n            <ul v-if=\"errors.length\" class=\"text-danger\">\n                <li v-for=\"error in errors\">{{ error }}</li>\n            </ul>\n        </td>\n        <td>\n            <a href=\"#\" @click.prevent=\"createNote()\">\n            <span class=\"glyphicon glyphicon-ok\" aria-hidden=\"true\"></span>\n            </a>\n        </td>\n    </tr>\n</tbody></table>\n"
+;(typeof module.exports === "function"? module.exports.options: module.exports).template = "\n<div class=\"alert_container\">\n    <p v-show=\"alert.display\" class=\"alert alert-danger\" id=\"error_message\" transition=\"fade\">{{ alert.message }}</p>\n</div>\n\n<table class=\"table table-striped\">\n    <tbody><tr>\n        <th>Categoría</th>\n        <th>Nota</th>\n        <th width=\"50px\">&nbsp;</th>\n    </tr>\n    <tr v-for=\"note in notes\" is=\"note-row\" :note=\"note\" :categories=\"categories\" @update-note=\"updateNote\" @delete-note=\"deleteNote\"></tr>\n    <tr>\n        <td><select-category :categories=\"categories\" :id.sync=\"new_note.category_id\"></select-category></td>\n        <td>\n            <input type=\"text\" v-model=\"new_note.note\" class=\"form-control\">\n            <ul v-if=\"errors &amp;&amp; errors.length\" class=\"text-danger\">\n                <li v-for=\"error in errors\">{{ error }}</li>\n            </ul>\n        </td>\n        <td>\n            <a href=\"#\" @click.prevent=\"createNote()\">\n            <span class=\"glyphicon glyphicon-ok\" aria-hidden=\"true\"></span>\n            </a>\n        </td>\n    </tr>\n</tbody></table>\n"
 if (module.hot) {(function () {  module.hot.accept()
   var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)

@@ -22,7 +22,7 @@
             <td><select-category :categories="categories" :id.sync="new_note.category_id"></select-category></td>
             <td>
                 <input type="text" v-model="new_note.note" class="form-control">
-                <ul v-if="errors.length" class="text-danger">
+                <ul v-if="errors && errors.length" class="text-danger">
                     <li v-for="error in errors">{{ error }}</li>
                 </ul>
             </td>
@@ -81,6 +81,10 @@ export default {
         });
 
         Vue.http.interceptors.push(function (request, next) {
+            var token = document.getElementById('token').getAttribute('content');
+
+            request.headers['X-CSRF-TOKEN'] = token;
+
             next(function (response) {
                 if (response.ok) {
                     return response;
@@ -90,8 +94,8 @@ export default {
                 this.alert.display = true;
 
                 setTimeout(function () {
-                    vm.alert.display = false;
-                }, 4000);
+                    this.alert.display = false;
+                }.bind(this), 4000);
 
                 return response;
             });
