@@ -1,7 +1,7 @@
 <template>
-    <tr class="animated" transition="bounce-out">
+    <tr class="animated">
         <template v-if="! editing">
-            <td>{{ note.category_id | category }}</td>
+            <td>{{ category_name }}</td>
             <td>{{ note.note }}</td>
             <td>
                 <a href="#" @click.prevent="edit()"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></a>
@@ -12,7 +12,7 @@
         </template>
         <template v-else>
             <td>
-                <select-category :categories="categories" :id.sync="draft.category_id"></select-category>
+                <select-category :categories="categories" :note="draft"></select-category>
             </td>
             <td>
                 <input type="text" v-model="draft.note" class="form-control">
@@ -33,6 +33,8 @@
 </template>
 
 <script>
+var utils = require('./../utils');
+
 export default {
     props: ['note', 'categories'],
     data: function() { 
@@ -41,6 +43,13 @@ export default {
             errors: [],
             draft: {}
         };
+    },
+    computed: {
+        category_name: function () {
+            var category = utils.findById(this.categories, this.note.category_id);
+
+            return category != null ? category.name : '';
+        }
     },
     methods: {
         edit: function () {
@@ -56,10 +65,10 @@ export default {
         update: function () {
             this.errors = [];
 
-            this.$dispatch('update-note', this);
+            this.$emit('update-note', this);
         },
         remove: function () {
-            this.$dispatch('delete-note', this.note);
+            this.$emit('delete-note', this.note);
         }
     }
 }

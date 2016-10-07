@@ -1,5 +1,5 @@
 <template>
-    <select v-model="id" class="form-control">
+    <select v-model="note.category_id" class="form-control">
         <option value="">- Selecciona una categoría</option>
         <option v-for="category in categories" :value="category.id">
             {{ category.name }}
@@ -10,6 +10,6 @@
 <script>
 export default {
     template: "#select_category_tpl",
-    props: ['categories', 'id']
+    props: ['categories', 'note']
 }
 </script>
